@@ -1,0 +1,51 @@
+name: Test Suite
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 2.x
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ 8, 10, 12 ]
+        env:
+          - db: sqlite3
+            node_env: testing
+          - db: mysql
+            node_env: testing-mysql
+    name: Node ${{ matrix.node }} - ${{ matrix.env.db }}
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: ghost_testing
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: yarn install
+
+      - run: yarn add sqlite3 --force
+        if: matrix.env.db == 'sqlite3'
+
+      - run: yarn ci
+        if: github.event_name == 'pull_request'
+        env:
+          DB: ${{ matrix.env.db }}
+          NODE_ENV: ${{ matrix.env.node_env }}
+
+      - run: grunt test-all --verbose
+        if: github.event_name != 'pull_request'
+        env:
+          DB: ${{ matrix.env.db }}
+          NODE_ENV: ${{ matrix.env.node_env }}
