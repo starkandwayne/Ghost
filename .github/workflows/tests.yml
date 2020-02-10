@@ -25,7 +25,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_DATABASE: ghost_testing
         ports:
-          - 3306
+            - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v2
@@ -38,14 +38,14 @@ jobs:
       - run: yarn add sqlite3 --force
         if: matrix.env.db == 'sqlite3'
 
-      - run: yarn ci
-        if: github.event_name == 'pull_request'
-        env:
-          DB: ${{ matrix.env.db }}
-          NODE_ENV: ${{ matrix.env.node_env }}
+      #- run: yarn ci
+        #if: github.event_name == 'pull_request'
+        #env:
+        #  DB: ${{ matrix.env.db }}
+        #  NODE_ENV: ${{ matrix.env.node_env }}
 
       - run: grunt test-all --verbose
-        if: github.event_name != 'pull_request'
+#        if: github.event_name != 'pull_request'
         env:
           DB: ${{ matrix.env.db }}
           NODE_ENV: ${{ matrix.env.node_env }}
