@@ -492,6 +492,9 @@ initData = function initData() {
                     timeout = setTimeout(retry, 50);
                 })();
             });
+        })
+        .catch(function (err) {
+            throw err;
         });
 };
 
@@ -998,6 +1001,9 @@ startGhost = function startGhost(options) {
                     module.exports.existingData.apiKeys = keys.toJSON();
                 })
                 .return(ghostServer);
+        })
+        .catch(function (err) {
+            throw err;
         });
 };
 
